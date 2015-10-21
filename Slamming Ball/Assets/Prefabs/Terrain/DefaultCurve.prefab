@@ -168,6 +168,14 @@ MonoBehaviour:
   thickness: 3
   initialU: 0
   defaultUVLength: 1
+  headPrefab: {fileID: 150812, guid: 45de17e5b1c147241a47664e8be273ba, type: 2}
+  head: {fileID: 0}
+  tailPrefab: {fileID: 198330, guid: e21622ff528859e448f179e9b3b3123d, type: 2}
+  tail: {fileID: 0}
+  headLoc: {x: 0, y: 0}
+  headRotation: 0
+  tailLoc: {x: 0, y: 0}
+  tailRotation: 0
 --- !u!1001 &100100000
 Prefab:
   m_ObjectHideFlags: 1
@@ -187,6 +195,14 @@ Prefab:
       propertyPath: defaultUVLength
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 0}
+      propertyPath: headPrefab
+      value: 
+      objectReference: {fileID: 150812, guid: 45de17e5b1c147241a47664e8be273ba, type: 2}
+    - target: {fileID: 0}
+      propertyPath: tailPrefab
+      value: 
+      objectReference: {fileID: 198330, guid: e21622ff528859e448f179e9b3b3123d, type: 2}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 0}
   m_RootGameObject: {fileID: 112808}

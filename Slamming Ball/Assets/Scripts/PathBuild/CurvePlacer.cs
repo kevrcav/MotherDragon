@@ -29,8 +29,15 @@ public class CurvePlacer : MonoBehaviour {
 	// Update is called once per frame
 	void Update () {
       if (placeState == PlaceState.kDisabled) return;
+
+
       if (mousePosition != Input.mousePosition)
       {
+         if (currentCurve == null && !Input.GetMouseButtonDown(0))
+         {
+            placeState = PlaceState.kNone;
+            return;
+         }
          mousePosition = Input.mousePosition;
          Vector3 inWorldMousePos = GetInWorldMousePos();
 
@@ -51,6 +58,7 @@ public class CurvePlacer : MonoBehaviour {
          if (placeState != PlaceState.kNone && placeState != PlaceState.kDisabled)
             currentCurve.UpdateMesh();
       }
+
       if (Input.GetMouseButtonDown(0))
       {
          switch (placeState)
@@ -62,7 +70,7 @@ public class CurvePlacer : MonoBehaviour {
                Vector2 newTangent = newPos + normalTangent;
                Vector2[] uvs = currentCurve.GetComponent<MeshFilter>().mesh.uv;
                float lastU = uvs[uvs.Length-1].x;
-               currentCurve = CurveMgr.Instance.NewCurve(newPos, newPos, newTangent, newPos, newPos);
+               currentCurve = CurveMgr.Instance.NewCurve(newPos, newPos, newTangent, newPos, newPos, true);
                currentCurve.initialU = lastU;
                placeState = PlaceState.kPoint;
                newLine = false;
@@ -76,16 +84,16 @@ public class CurvePlacer : MonoBehaviour {
             case PlaceState.kNone:
                Vector3 inWorldMousePos = GetInWorldMousePos();
                currentCurve = CurveMgr.Instance.NewCurve(inWorldMousePos, inWorldMousePos, 
-                                                         inWorldMousePos, inWorldMousePos, inWorldMousePos);
+                                                         inWorldMousePos, inWorldMousePos, inWorldMousePos, false);
                placeState = PlaceState.kPoint;
                newLine = true;
                break;
 
          }
       }
-      else if (Input.GetMouseButtonDown(1))
+      else if (Input.GetMouseButtonDown(1) && placeState != PlaceState.kNone)
       {
-         Destroy(currentCurve.gameObject);
+         CurveMgr.Instance.RemoveLatestCurve();
          placeState = PlaceState.kNone;
       }
 	}

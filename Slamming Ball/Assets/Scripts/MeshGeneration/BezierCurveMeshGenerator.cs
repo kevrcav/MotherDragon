@@ -14,6 +14,19 @@ public class BezierCurveMeshGenerator : MonoBehaviour
 
    public float defaultUVLength = 1;
 
+   public GameObject headPrefab;
+   public DragonPart head;
+   public GameObject tailPrefab;
+   public DragonPart tail;
+
+   public Vector2 headLoc;
+   public float headRotation;
+   public Vector2 tailLoc;
+   public float tailRotation;
+
+   bool useHead;
+   bool useTail;
+
    void Start()
    {
       CreateMesh();
@@ -23,6 +36,44 @@ public class BezierCurveMeshGenerator : MonoBehaviour
    void Update()
    {
 
+   }
+
+   public void SetUseHead(bool b)
+   {
+      if (useHead == b) return;
+
+      useHead = b;
+
+      if (!useHead)
+      {
+         Destroy(head.gameObject);
+      }
+      else if (head == null)
+      {
+         head = (Instantiate(headPrefab, headLoc, Quaternion.AngleAxis(headRotation, Vector3.forward)) as GameObject).GetComponent<DragonPart>();
+         head.transform.parent = transform;
+         head.transform.localPosition = headLoc;
+         GetComponent<Curve>().SetPartMaterial(head);
+      }
+   }
+
+   public void SetUseTail(bool b)
+   {
+      if (useTail == b) return;
+
+      useTail = b;
+
+      if (!useTail)
+      {
+         Destroy(tail.gameObject);
+      }
+      else if (tail == null)
+      {
+         tail = (Instantiate(tailPrefab, tailLoc, Quaternion.AngleAxis(tailRotation, Vector3.forward)) as GameObject).GetComponent<DragonPart>();
+         tail.transform.parent = transform;
+         tail.transform.localPosition = tailLoc;
+         GetComponent<Curve>().SetPartMaterial(tail);
+      }
    }
 
    public Vector2[] GetBezierPoints()
@@ -91,6 +142,47 @@ public class BezierCurveMeshGenerator : MonoBehaviour
                minY = point.y;
          }
       }
+
+      if (useHead)
+      {
+         headLoc = bezierCurve[numberPoints - 1];
+         Vector2 headTangent = new Vector2(-normals[numberPoints - 2].y, normals[numberPoints - 2].x);
+         headRotation = Mathf.Acos(Vector2.Dot(headTangent, Vector2.right)) * 180.0f / Mathf.PI;
+         if (headTangent.y < 0) headRotation *= -1;
+         if (head == null)
+         {
+            head = (Instantiate(headPrefab, headLoc, Quaternion.AngleAxis(headRotation, Vector3.forward)) as GameObject).GetComponent<DragonPart>();
+            head.transform.parent = transform;
+            head.transform.localPosition = headLoc;
+            GetComponent<Curve>().SetPartMaterial(head);
+         }
+         else
+         {
+            head.transform.localPosition = headLoc;
+            head.transform.rotation = Quaternion.AngleAxis(headRotation, Vector3.forward);
+         }
+      }
+      if (useTail)
+      {
+         tailLoc = bezierCurve[0];
+         Vector2 tailTangent = new Vector2(-normals[1].y, normals[1].x);
+         tailRotation = Mathf.Acos(Vector2.Dot(tailTangent, Vector2.right)) * 180.0f / Mathf.PI;
+         if (tailTangent.y < 0) tailRotation *= -1;
+         if (tail == null)
+         {
+            tail = (Instantiate(tailPrefab, tailLoc, Quaternion.AngleAxis(tailRotation, Vector3.forward)) as GameObject).GetComponent<DragonPart>();
+            tail.transform.parent = transform;
+            tail.transform.localPosition = tailLoc;
+            GetComponent<Curve>().SetPartMaterial(tail);
+         }
+         else
+         {
+            tail.transform.localPosition = tailLoc;
+            tail.transform.rotation = Quaternion.AngleAxis(tailRotation, Vector3.forward);
+         }
+      }
+
+
 
       meshBounds = new Bounds(new Vector3(maxX + minX, maxY + minY, 0) / 2, new Vector3(maxX - minX, maxY - minY, 0));
 

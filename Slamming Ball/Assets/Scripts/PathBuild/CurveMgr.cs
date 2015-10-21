@@ -9,6 +9,7 @@ public struct CurveMaterial
    public float ball_speed;
    public Texture texture;
    public Sprite UITexture;
+   public string matType;
    
    public bool magnetic;
 }
@@ -45,7 +46,7 @@ public class CurveMgr : MonoBehaviour {
       curves = new List<Curve>();
    }
 
-   public BezierCurveMeshGenerator NewCurve(Vector3 pos, Vector2 startPoint, Vector2 startTangent, Vector2 endPoint, Vector2 endTangent)
+   public BezierCurveMeshGenerator NewCurve(Vector3 pos, Vector2 startPoint, Vector2 startTangent, Vector2 endPoint, Vector2 endTangent, bool continuation)
    {
       curves.Add(currentCurve);
       BezierCurveMeshGenerator newCurve = (BezierCurveMeshGenerator)Instantiate(defaultCurve, pos, Quaternion.identity);
@@ -53,7 +54,16 @@ public class CurveMgr : MonoBehaviour {
       newCurve.SetBezierPoint(1, startTangent);
       newCurve.SetBezierPoint(2, endTangent);
       newCurve.SetBezierPoint(3, endPoint);
+      if (continuation)
+      {
+         currentCurve.GetComponent<BezierCurveMeshGenerator>().SetUseHead(false);
+         newCurve.SetUseTail(false);
+      }
+      else
+         newCurve.SetUseTail(true);
+      newCurve.SetUseHead(true);
       currentCurve = newCurve.GetComponent<Curve>();
+      
       UpdateMaterial();
       return newCurve;
    }
@@ -74,17 +84,27 @@ public class CurveMgr : MonoBehaviour {
       }
       else if (Input.GetKeyDown(KeyCode.Z))
       {
-         if (currentCurve)
-            Destroy(currentCurve.gameObject);
-         else if (curves.Count > 0)
-         {
-            Curve lastCurve = curves[curves.Count - 1];
-            curves.Remove(lastCurve);
-            Destroy(lastCurve.gameObject);
-         }
-         placer.ClearCurrent();
+         RemoveLatestCurve();
       }
 
+   }
+
+   public void RemoveLatestCurve()
+   {
+      if (currentCurve != null)
+         Destroy(currentCurve.gameObject);
+      else if (curves.Count > 0)
+      {
+         Curve lastCurve = curves[curves.Count - 1];
+         curves.Remove(lastCurve);
+         if (lastCurve != null)
+            Destroy(lastCurve.gameObject);
+      }
+      Debug.Log(curves.Count);
+      if (curves.Count > 0)
+      {
+         curves[curves.Count - 1].GetComponent<BezierCurveMeshGenerator>().SetUseHead(true);
+      }
    }
 
    public void SetCreationEnabled(bool b)
@@ -94,7 +114,7 @@ public class CurveMgr : MonoBehaviour {
       editEnabled = b;
 
       if (!editEnabled && currentCurve != null)
-         Destroy(currentCurve.gameObject);
+         RemoveLatestCurve();
 
      placer.EnableEditing(b);
    }
@@ -125,6 +145,11 @@ public class CurveMgr : MonoBehaviour {
       if (currentCurve != null)
       {
          currentCurve.SetMaterial(materials[currentMaterial]);
+         BezierCurveMeshGenerator generator = currentCurve.GetComponent<BezierCurveMeshGenerator>();
+         if (generator.head != null)
+            currentCurve.SetPartMaterial(generator.head);
+         if (generator.tail != null)
+            currentCurve.SetPartMaterial(generator.tail);
       }
       HUDMgr.Instance.ChangeCurrentMaterial(materials[currentMaterial].UITexture);
    }

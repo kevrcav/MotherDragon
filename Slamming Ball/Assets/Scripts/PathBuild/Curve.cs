@@ -11,6 +11,11 @@ public class Curve : MonoBehaviour {
       GetComponent<MeshRenderer>().material.mainTexture = material.texture;
    }
 
+   public void SetPartMaterial(DragonPart part)
+   {
+      part.UseSprite(material.matType);
+   }
+
    public float GetBallSpeed()
    {
       return material.ball_speed;
